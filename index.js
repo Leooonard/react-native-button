@@ -1,161 +1,159 @@
 /*
   1. 支持点击事件。
-  2. 点击时样式变化。
-  3. 外部设置按钮disable。
-    3.1 disable时样式变化。
-  4. customStyle。
+  2. 支持长按事件。
+  3. 点击时样式变化。
+  4. 外部设置按钮disable。
+    4.1 disable时样式变化。
+  5. customStyle。
 */
 
 import React, {
-  Component,
-  propTypes
+   Component,
+   propTypes
 } from 'react';
 
 import {
-  AppRegistry,
-  StyleSheet,
-  Text,
-  View,
-  TouchableWithoutFeedback
+   AppRegistry,
+   StyleSheet,
+   View,
+   TouchableWithoutFeedback
 } from 'react-native';
 
-var ObjectAssign = require('object-assign');
+import autobind from 'autobind-decorator';
 
 const BUTTON_STATUS = {
-  normal: 'normal',
-  focus: 'focus',
-  disabled: 'disabled'
+   normal: 'normal',
+   focus: 'focus',
+   disabled: 'disabled'
 };
 
-export default class Button extends Component {
-  constructor() {
-    super();
+let styles = StyleSheet.create({
+   wrapper: {
+      flex: 1,
+      borderWidth: 1,
+      padding: 6,
+      paddingLeft: 12,
+      paddingRight: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: 4,
+   }
+});
 
-    this.state = {
-      status: BUTTON_STATUS.normal
-    };
+@autobind
+class Button extends Component {
+   static propTypes = {
+      focusStart: React.PropTypes.func,
+      focusEnd: React.PropTypes.func,
+      click: React.PropTypes.func,
+      longClick: React.PropTypes.func,
+      
+      disabled: React.PropTypes.bool,
+      normalStyle: React.PropTypes.object,
+      focusStyle: React.PropTypes.object,
+      disabledStyle: React.PropTypes.object
+   };
 
-    this.pressIn = this.pressIn.bind(this);
-    this.pressOut = this.pressOut.bind(this);
-  }
+   static defaultProps = {
+      focusStart: () => {},
+      focusEnd: () => {},
+      click: () => {},
+      longClick: () => {},
 
-  pressIn() {
-    this.setState({
-      status: BUTTON_STATUS.focus
-    });
-  }
+      disabled: false,
+      normalStyle: {},
+      focusStyle: {},
+      disabledStyle: {}
+   };
 
-  pressOut(e) {
-    this.setState({
-      status: BUTTON_STATUS.normal
-    });
-    this.props.click(e);
-  }
+   constructor() {
+      super();
 
-  getWrapperStyle(statusInfluencedStyle) {
-    return ObjectAssign({}, styles.wrapper, statusInfluencedStyle, this.props.wrapperCustomStyle);
-  }
+      this.state = {
+         status: BUTTON_STATUS.normal
+      };
+   }
 
-  getButtonStatus() {
-    if(this.props.disabled) {
-      return BUTTON_STATUS.disabled;
-    } else {
-      return this.state.status;
-    }
-  }
+   pressIn() {
+      this.setState({
+         status: BUTTON_STATUS.focus
+      });
 
-  getWrapperStatusInfluencedStyle(status) {
-    switch(status) {
-      case BUTTON_STATUS.normal:
-        return this.getNormalStyle();
-      case BUTTON_STATUS.focus:
-        return this.getFocusStyle();
-      case BUTTON_STATUS.disabled:
-        return this.getDisabledStyle();
-      default:
-        return this.getNormalStyle();
-    }
-  }
+      this.props.focusStart();
+   }
 
-  getFocusStyle() {
-    const FOCUS_BACKGROUND_COLOR = '#31b0d5';
-    const FOCUS_BORDER_COLOR = '#1b6d85'
+   pressOut() {
+      this.setState({
+         status: BUTTON_STATUS.normal
+      });
 
-    return {
-      backgroundColor: FOCUS_BACKGROUND_COLOR,
-      borderColor: FOCUS_BORDER_COLOR,
-    };
-  }
+      this.props.focusEnd();
+   }
 
-  getDisabledStyle() {
-    const DISABLED_BACKGROUND_COLOR = '#5bc0de';
-    const DISABLED_BORDER_COLOR = '#46b8da';
+   press() {
+      this.props.click();
+   }
 
-    return {
-      backgroundColor: DISABLED_BACKGROUND_COLOR,
-      borderColor: DISABLED_BORDER_COLOR,
-    };
-  }
+   longPress() {
+      this.props.longClick();
+   }
 
-  getNormalStyle() {
-    const NORMAL_BACKGROUND_COLOR = '#5bc0de';
-    const NORMAL_BORDER_COLOR = '#46b8da'
+   getWrapperStyle(statusInfluencedStyle) {
+      return [styles.wrapper, this.props.normalStyle, statusInfluencedStyle];
+   }
 
-    return {
-      backgroundColor: NORMAL_BACKGROUND_COLOR,
-      borderColor: NORMAL_BORDER_COLOR,
-    };
-  }
+   getButtonStatus() {
+      if (this.props.disabled) {
+         return BUTTON_STATUS.disabled;
+      } else {
+         return this.state.status;
+      }
+   }
 
-  render() {
-    let buttonStatus = this.getButtonStatus();
-    let wrapperStatusInfluencedStyle = this.getWrapperStatusInfluencedStyle(buttonStatus);
-    let wrapperStyle = this.getWrapperStyle(wrapperStatusInfluencedStyle);
+   getWrapperStatusInfluencedStyle(status) {
+      switch (status) {
+         case BUTTON_STATUS.normal:
+            return this.getNormalStyle();
+         case BUTTON_STATUS.focus:
+            return this.getFocusStyle();
+         case BUTTON_STATUS.disabled:
+            return this.getDisabledStyle();
+         default:
+            return this.getNormalStyle();
+      }
+   }
 
-    return (
-      <TouchableWithoutFeedback
+   getFocusStyle() {
+      return this.props.focusStyle;
+   }
+
+   getDisabledStyle() {
+      return this.props.disabledStyle;
+   }
+
+   getNormalStyle() {
+      return this.props.normalStyle;
+   }
+
+   render() {
+      let buttonStatus = this.getButtonStatus();
+      let wrapperStatusInfluencedStyle = this.getWrapperStatusInfluencedStyle(buttonStatus);
+      let wrapperStyle = this.getWrapperStyle(wrapperStatusInfluencedStyle);
+
+      return (
+         <TouchableWithoutFeedback
         onPressIn = {this.pressIn}
         onPressOut = {this.pressOut}
+        onPress = {this.press}
+        onLongPress = {this.longPress}
         disabled = {this.props.disabled}
       >
         <View style = {wrapperStyle}>
-          <Text style = {styles.text}>
-            {this.props.text}
-          </Text>
+         {this.props.children}
         </View>
       </TouchableWithoutFeedback>
-    );
-  }
+      );
+   }
 }
 
-Button.propTypes = {
-  text: React.PropTypes.string,
-  click: React.PropTypes.func,
-  disabled: React.PropTypes.bool,
-  wrapperCustomStyle: React.PropTypes.object,
-};
-
-Button.defaultProps = {
-  text: '',
-  click: () => {},
-  disabled: false,
-  wrapperCustomStyle: {},
-};
-
-let styles = {
-  wrapper: {
-    flex: 1,
-    borderWidth: 1,
-    padding: 6,
-    paddingLeft: 12,
-    paddingRight: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 4,
-  },
-  text: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: 'bold',
-  }
-};
+export default Button;
