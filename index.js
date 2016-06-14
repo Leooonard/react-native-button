@@ -98,10 +98,6 @@ class Button extends Component {
       this.props.longClick();
    }
 
-   getWrapperStyle(statusInfluencedStyle) {
-      return [styles.wrapper, this.props.normalStyle, statusInfluencedStyle];
-   }
-
    getButtonStatus() {
       if (this.props.disabled) {
          return BUTTON_STATUS.disabled;
@@ -124,21 +120,20 @@ class Button extends Component {
    }
 
    getFocusStyle() {
-      return this.props.focusStyle;
+      return [styles.wrapper, this.props.normalStyle, this.props.focusStyle];    
    }
 
    getDisabledStyle() {
-      return this.props.disabledStyle;
+      return [styles.wrapper, this.props.normalStyle, this.props.disabledStyle];s
    }
 
    getNormalStyle() {
-      return this.props.normalStyle;
+      return [styles.wrapper, this.props.normalStyle];
    }
 
    render() {
       let buttonStatus = this.getButtonStatus();
-      let wrapperStatusInfluencedStyle = this.getWrapperStatusInfluencedStyle(buttonStatus);
-      let wrapperStyle = this.getWrapperStyle(wrapperStatusInfluencedStyle);
+      let wrapperStyle = this.getWrapperStatusInfluencedStyle(buttonStatus);
 
       return (
          <TouchableWithoutFeedback
