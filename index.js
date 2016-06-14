@@ -19,8 +19,6 @@ import {
    TouchableWithoutFeedback
 } from 'react-native';
 
-import autobind from 'autobind-decorator';
-
 const BUTTON_STATUS = {
    normal: 'normal',
    focus: 'focus',
@@ -29,18 +27,14 @@ const BUTTON_STATUS = {
 
 let styles = StyleSheet.create({
    wrapper: {
-      flex: 1,
       borderWidth: 1,
       padding: 6,
       paddingLeft: 12,
       paddingRight: 12,
-      alignItems: 'center',
-      justifyContent: 'center',
       borderRadius: 4,
    }
 });
 
-@autobind
 class Button extends Component {
    static propTypes = {
       focusStart: React.PropTypes.func,
@@ -72,6 +66,11 @@ class Button extends Component {
       this.state = {
          status: BUTTON_STATUS.normal
       };
+
+      this.pressIn = this.pressIn.bind(this);
+      this.pressOut = this.pressOut.bind(this);
+      this.press = this.press.bind(this);
+      this.longPress = this.longPress.bind(this);
    }
 
    pressIn() {
